@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
@@ -7,29 +8,26 @@ from django.shortcuts import redirect
 from .models import Post, Group, User, Follow
 from .forms import PostForm, CommentForm
 
-from yatube.settings import PAGE_NUM
+
+def paginator_main(request, post_list):
+    paginator = Paginator(post_list, settings.PAGE_NUM)
+    page_number = request.GET.get('page')
+    page = paginator.get_page(page_number)
+    return page
 
 
 def index(request):
 
     post_list = Post.objects.all()
-    paginator = Paginator(post_list, PAGE_NUM)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    context = {
-        'page_obj': page_obj,
-    }
-    return render(request, 'index.html', context)
+    page_obj = paginator_main(request, post_list)
+    return render(request, 'index.html', {'page_obj': page_obj})
 
 
 def group_posts(request, slug):
 
     group = get_object_or_404(Group, slug=slug)
     posts = group.posts.all()
-
-    paginator = Paginator(posts, PAGE_NUM)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    page_obj = paginator_main(request, posts)
 
     template = 'group_list.html'
 
@@ -43,17 +41,14 @@ def group_posts(request, slug):
 def profile(request, username):
     user = get_object_or_404(User, username=username)
     post_list = Post.objects.filter(author=user).order_by('-pub_date')
-    paginator = Paginator(post_list, PAGE_NUM)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    post_number = paginator.count
+    page_obj = paginator_main(request, post_list)
+    post_number = paginator_main(request, post_list).count
     if request.user.is_authenticated:
-        following = Follow.objects.filter(
+        following = user.following.filter(
             user=request.user,
             author=user
         ).exists()
-    else:
-        following = None
+    following = None
 
     template = 'posts/profile.html'
 
@@ -104,7 +99,12 @@ def post_create(request):
 
 @login_required
 def post_edit(request, post_id):
+
     post = get_object_or_404(Post, pk=post_id)
+
+    if post.author != request.user:
+        return redirect('posts:post_detail', post_id=post_id)
+
     form = PostForm(request.POST or None, instance=post)
     groups = Group.objects.all()
     if form.is_valid():
@@ -140,9 +140,7 @@ def follow_index(request):
     posts = Post.objects.filter(
         author__following__user=request.user
     ).order_by('-pub_date')
-    paginator = Paginator(posts, PAGE_NUM)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    page_obj = paginator_main(request, posts)
     context = {
         'page_obj': page_obj,
     }

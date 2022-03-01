@@ -1,7 +1,5 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from core.models import CreatedModel
-# from .validators import validate_empty_field
 
 User = get_user_model()
 
@@ -25,7 +23,7 @@ class Group(models.Model):
         return self.title
 
 
-class Post(CreatedModel):
+class Post(models.Model):
     text = models.TextField(
         'Текст поста',
         help_text='Введите текст поста'
