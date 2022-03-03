@@ -1,11 +1,10 @@
+from django.conf import settings
 from django import forms
 from django.test import TestCase, Client
 from django.urls import reverse
 
 
 from posts.models import Post, Group, User, Follow
-
-from yatube.settings import PAGE_NUM
 
 
 class PostPagesTests(TestCase):
@@ -237,7 +236,7 @@ class PaginatorViewsTest(TestCase):
         response = self.client.get(reverse('posts:index'))
         page_obj = response.context['page_obj']
         number_obj = page_obj.paginator.get_page('1').object_list.count()
-        self.assertEqual(number_obj, PAGE_NUM)
+        self.assertEqual(number_obj, settings.PAGE_NUM)
 
     def test_second_page_contains_three_records(self):
         response = self.client.get(
