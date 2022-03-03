@@ -1,30 +1,20 @@
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
 from django.shortcuts import redirect
 
 from .models import Post, Group, User, Follow
 from .forms import PostForm, CommentForm
-
-
-def paginator_main(request, post_list):
-    paginator = Paginator(post_list, settings.PAGE_NUM)
-    page_number = request.GET.get('page')
-    page = paginator.get_page(page_number)
-    return page
+from pagin import paginator_main
 
 
 def index(request):
-
     post_list = Post.objects.all()
     page_obj = paginator_main(request, post_list)
     return render(request, 'index.html', {'page_obj': page_obj})
 
 
 def group_posts(request, slug):
-
     group = get_object_or_404(Group, slug=slug)
     posts = group.posts.all()
     page_obj = paginator_main(request, posts)
@@ -151,7 +141,7 @@ def follow_index(request):
 def profile_follow(request, username):
     author = get_object_or_404(User, username=username)
     if request.user != author:
-        Follow.objects.get_or_create(user=request.user, author=author)
+        author.following.get_or_create(user=request.user, author=author)
     return redirect('posts:profile', username=author)
 
 
