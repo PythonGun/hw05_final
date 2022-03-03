@@ -5,7 +5,7 @@ from django.shortcuts import redirect
 
 from .models import Post, Group, User, Follow
 from .forms import PostForm, CommentForm
-from pagin import paginator_main
+from .pagin import paginator_main
 
 
 def index(request):
