@@ -71,7 +71,10 @@ def post_detail(request, post_id):
 @csrf_exempt
 def post_create(request):
 
-    form = PostForm(request.POST or None)
+    form = PostForm(
+        request.POST or None,
+        files=request.FILES or None
+    )
     groups = Group.objects.all()
     template = 'posts/create_post.html'
 
@@ -95,7 +98,11 @@ def post_edit(request, post_id):
     if post.author != request.user:
         return redirect('posts:post_detail', post_id=post_id)
 
-    form = PostForm(request.POST or None, instance=post)
+    form = PostForm(
+        request.POST or None,
+        files=request.FILES or None,
+        instance=post
+    )
     groups = Group.objects.all()
     if form.is_valid():
         form = form.save(False)
