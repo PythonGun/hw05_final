@@ -18,7 +18,7 @@ _Для Windows PowerShell_
 #### Клонируем репозиторий на локальную машину:
 ```
 https://github.com/PythonGun/api_yamdb
-git clone git@github.com:PythonGun/api_yamdb.git
+git clone git@github.com:PythonGun/hw05_final.git
 ```
 
 #### Создаем и активируем виртуальное окружение:
